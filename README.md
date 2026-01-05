@@ -13,7 +13,7 @@ Neat Checklist is a lightweight, client-side checklist app focused on simplicity
 - **Undo support**: Revert recent changes.
 - **Responsive design**: Works on desktop and mobile.
 - **Dark mode support**
-- **Export / copy**: Export your checklist or copy it to the clipboard.
+- **Export / copy**: Export your checklist or copy it to the clipboard in serialized format which can be parsed by the input box.
 
 ## How It Works
 
@@ -33,6 +33,7 @@ Task ordering is preserved with drag-and-drop, and changes automatically propaga
 2. Open `index.html` in your browser.
 3. Add, edit, reorder, and test tasks locally.
 4. Live demo available at: [https://kirkcorwin.github.io/neat-checklist/](https://kirkcorwin.github.io/neat-checklist/)
+5. test_checklist.txt can be dropped onto the page to load the checklist, or the contents can be copied and pasted into the input box
 
 ## Why This Exists
 

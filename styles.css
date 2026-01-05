@@ -265,25 +265,33 @@ footer {
     margin-top: 0.5rem;
     width: 100%;
     justify-content: flex-start;
-    gap: 0.5rem;
+    gap: 0.25rem;
   }
 
   /* Keep toggle button in normal size and first */
   .priority-toggle {
-    width: 64px;
-    height: 64px;
+    width: 42px;
+    height: 42px;
     flex-shrink: 0;
     order: 1;
   }
 
+  /* Checkbox */
+  input[type="checkbox"] {
+    width: 32px;
+    height: 32px;
+    accent-color: #111;
+    cursor: pointer;
+  }
+
   /* Scale down other buttons */
-  /* .priority-bubbles .priority,
+  .priority-bubbles .priority,
   .delete-item {
-    width: calc(33.33% - 0.33rem);
-    height: auto;
+    width: 42px;
+    height: 42px;
     font-size: 0.9rem;
     order: 2; 
-  } */
+  }
 
   /* Ensure bubbles + delete wrap correctly */
   .priority-bubbles,

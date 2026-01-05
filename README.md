@@ -4,7 +4,7 @@ Neat Checklist is a lightweight, client-side checklist app focused on simplicity
 
 ## Features
 
-- **CRUD operations**: Add, edit, and delete tasks.
+- **Operations**: Add, edit, and delete tasks.
 - **Priority system**: Assign and update priorities using a color-coded scheme.
 - **Completion toggle**: Mark tasks done with a checkbox.
 - **Drag-and-drop**: Reorder tasks manually.

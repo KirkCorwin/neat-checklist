@@ -145,7 +145,7 @@ input[type="checkbox"] {
   align-items: center;
   justify-content: flex-end;
   gap: 0.5rem;
-  min-width: 260px; /* prevents layout jumping */
+  min-width: 180px; /* prevents layout jumping */
 }
 
 /* Priority bubbles */
@@ -248,4 +248,48 @@ footer {
   width: 100%;
   margin-top: 0.25rem;
   font-size: 1.1rem;
+}
+
+
+/* Responsive layout for small screens */
+@media (max-width: 500px) {
+  .item {
+    flex-direction: column; /* stack checkbox/text above controls */
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .right-controls {
+    display: flex;
+    flex-wrap: wrap;       /* allow buttons to go to second row */
+    margin-top: 0.5rem;
+    width: 100%;
+    justify-content: flex-start;
+    gap: 0.5rem;
+  }
+
+  /* Keep toggle button in normal size and first */
+  .priority-toggle {
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+    order: 1;
+  }
+
+  /* Scale down other buttons */
+  /* .priority-bubbles .priority,
+  .delete-item {
+    width: calc(33.33% - 0.33rem);
+    height: auto;
+    font-size: 0.9rem;
+    order: 2; 
+  } */
+
+  /* Ensure bubbles + delete wrap correctly */
+  .priority-bubbles,
+  .delete-item {
+    display: flex;           /* flex for inner content alignment */
+    justify-content: center;
+    align-items: center;
+  }
 }

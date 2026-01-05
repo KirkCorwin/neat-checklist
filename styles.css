@@ -1,0 +1,251 @@
+:root {
+  --later: 126, 87, 194;
+  --low: 33, 150, 243;
+  --high: 76, 175, 80;
+  --very-high: 255, 152, 0;
+  --now: 244, 67, 54;
+
+  --bg-light: #f6f7f9;
+  --text-light: #111;
+  --bg-dark: #121212;
+  --text-dark: #eee;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg-light);
+  color: var(--text-light);
+  transition: background 0.25s, color 0.25s;
+}
+
+body.dark {
+  background: var(--bg-dark);
+  color: var(--text-dark);
+}
+
+.app {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+/* Header / title */
+header h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Buttons */
+button {
+  padding: 0.65rem 1.2rem;
+  font-size: 1.1rem;
+  font-weight: 800;
+  border-radius: 999px;
+  border: 2.5px solid currentColor;
+  background: white;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease, color 0.2s ease;
+}
+
+body.dark button {
+  background: #222;
+  color: #eee;
+  border-color: #eee;
+}
+
+button:hover {
+  background: #111;
+  color: white;
+}
+
+button:active {
+  transform: scale(0.96);
+}
+
+/* List */
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+}
+
+/* Item */
+.item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.2rem;
+  margin-bottom: 0.7rem;
+  border-radius: 999px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.07);
+  transition: background-color 0.25s ease, transform 0.25s ease;
+  touch-action: pan-y;
+  font-size: 1.25rem;
+  position: relative;
+}
+
+.item.dragging {
+  opacity: 0.4;
+}
+
+.item.done {
+  text-decoration: line-through;
+  text-decoration-thickness: 4px;
+  opacity: 0.65;
+}
+
+/* Priority tint */
+.item[data-priority="1"] { background: rgba(var(--later), 0.4); }
+.item[data-priority="2"] { background: rgba(var(--low), 0.4); }
+.item[data-priority="3"] { background: rgba(var(--high), 0.4); }
+.item[data-priority="4"] { background: rgba(var(--very-high), 0.4); }
+.item[data-priority="5"] { background: rgba(var(--now), 0.4); }
+
+/* Checkbox */
+input[type="checkbox"] {
+  width: 24px;
+  height: 24px;
+  accent-color: #111;
+  cursor: pointer;
+}
+
+/* Text */
+.text {
+  flex: 1;
+  font-weight: 500;
+  cursor: text;
+}
+
+/* Rename input */
+.rename {
+  flex: 1;
+  font-size: 1.25rem;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-weight: 500;
+  padding: 0;
+  margin: 0;
+}
+
+/* Right-side controls container */
+.right-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  min-width: 360px; /* prevents layout jumping */
+}
+
+/* Priority bubbles */
+.priority-bubbles {
+  display: none;
+  gap: 0.5rem;
+}
+
+.priority-bubbles.show {
+  display: flex;
+}
+
+/* Priority button */
+.priority {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.1;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.priority[data-level="1"] { background: rgb(var(--later)); }
+.priority[data-level="2"] { background: rgb(var(--low)); }
+.priority[data-level="3"] { background: rgb(var(--high)); }
+.priority[data-level="4"] { background: rgb(var(--very-high)); }
+.priority[data-level="5"] { background: rgb(var(--now)); }
+
+.priority:hover {
+  transform: scale(1.1);
+}
+
+.priority.selected {
+  box-shadow: 0 0 0 4px #111;
+}
+
+/* Shaded per-item priority toggle (closed state) */
+.priority-toggle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.15);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.priority-toggle:hover {
+  background: rgba(0,0,0,0.3);
+  transform: scale(1.05);
+}
+
+/* Delete button (replaces shaded toggle when editing) */
+.delete-item {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(255,0,0,0.15);
+  color: #900;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.delete-item:hover {
+  background: rgba(255,0,0,0.3);
+  transform: scale(1.05);
+}
+
+/* Footer input */
+footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+}
+
+#itemInput {
+  width: 100%;
+  padding: 1rem 1.4rem;
+  font-size: 1.25rem;
+  border-radius: 999px;
+  border: 2.5px solid currentColor;
+  outline: none;
+  margin-bottom: 0.25rem;
+}
+
+#addItemBtn {
+  width: 100%;
+  margin-top: 0.25rem;
+  font-size: 1.1rem;
+}

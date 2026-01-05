@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Checklist Queue</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+
+    <header>
+      <h1>Checklist Queue</h1>
+      <div class="controls">
+        <button id="togglePriority">Edit Priority</button>
+        <button id="sortPriority">Sort by Priority</button>
+        <button id="deleteDone">Delete Done</button>
+        <button id="clearChecklist">Clear List</button>
+        <button id="undo">Undo</button>
+        <button id="copyList">Copy List</button>
+        <button id="saveFile">Save List</button>
+        <button id="toggleDark">Dark Mode</button>
+        <button id="toggleInputPos">Bottom</button>
+      </div>
+    </header>
+
+    <main>
+      <ul id="list"></ul>
+    </main>
+
+    <footer>
+      <input
+        id="itemInput"
+        type="text"
+        placeholder="Type item and hit Enter…"
+        autocomplete="off"
+      />
+      <button id="addItemBtn">Add Item</button>
+    </footer>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

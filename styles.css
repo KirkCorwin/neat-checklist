@@ -106,11 +106,11 @@ ul {
 }
 
 /* Priority tint */
-.item[data-priority="1"] { background: rgba(var(--later), 0.4); }
-.item[data-priority="2"] { background: rgba(var(--low), 0.4); }
-.item[data-priority="3"] { background: rgba(var(--high), 0.4); }
-.item[data-priority="4"] { background: rgba(var(--very-high), 0.4); }
-.item[data-priority="5"] { background: rgba(var(--now), 0.4); }
+.item[data-priority="1"] { background: rgba(var(--later), 0.7); }
+.item[data-priority="2"] { background: rgba(var(--low), 0.7); }
+.item[data-priority="3"] { background: rgba(var(--high), 0.7); }
+.item[data-priority="4"] { background: rgba(var(--very-high), 0.7); }
+.item[data-priority="5"] { background: rgba(var(--now), 0.7); }
 
 /* Checkbox */
 input[type="checkbox"] {

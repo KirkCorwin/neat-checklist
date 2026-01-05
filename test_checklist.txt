@@ -1,0 +1,100 @@
+::TITLE:: Test Checklist
+
+::ITEM::
+plan daily work session || 5 || false
+::ITEM::
+read 10 pages of novel || 1 || true
+::ITEM::
+drink morning coffee || 5 || true
+::ITEM::
+call mom and check in || 3 || true
+::ITEM::
+write unit tests for checklist app || 5 || false
+::ITEM::
+update task icons and styles || 3 || false
+::ITEM::
+play a short game of chess || 1 || true
+::ITEM::
+backup local checklist data || 3 || false
+::ITEM::
+reorganize bookshelf || 2 || false
+::ITEM::
+test exporting checklist to clipboard || 1 || false
+::ITEM::
+fix bike lights || 1 || false
+::ITEM::
+organize workspace || 3 || true
+::ITEM::
+update README with new instructions || 4 || true
+::ITEM::
+install new keyboard drivers || 3 || false
+::ITEM::
+check emails and respond to urgent ones || 5 || true
+::ITEM::
+take out recycling || 2 || true
+::ITEM::
+refactor priority button code || 4 || false
+::ITEM::
+watch tutorial on React state management || 1 || false
+::ITEM::
+wake up and stretch || 5 || true
+::ITEM::
+clean coffee machine || 2 || false
+::ITEM::
+review pull requests || 4 || false
+::ITEM::
+try new cycling route || 1 || true
+::ITEM::
+update VSCode extensions || 2 || false
+::ITEM::
+plan weekend trip || 4 || true
+::ITEM::
+finish reading technical article || 3 || true
+::ITEM::
+prepare lunch || 5 || false
+::ITEM::
+stretch after coding session || 3 || true
+::ITEM::
+organize project folder || 4 || false
+::ITEM::
+take dog for a walk || 2 || true
+::ITEM::
+buy groceries || 3 || false
+::ITEM::
+update personal notes || 3 || false
+::ITEM::
+schedule dentist appointment || 2 || false
+::ITEM::
+meditate for 10 minutes || 3 || true
+::ITEM::
+try new coffee blend || 1 || false
+::ITEM::
+plan coding side project || 4 || false
+::ITEM::
+water plants || 2 || true
+::ITEM::
+setup automated backup || 3 || false
+::ITEM::
+practice guitar || 1 || true
+::ITEM::
+call friend to catch up || 2 || true
+::ITEM::
+research new frontend framework || 4 || false
+::ITEM::
+write blog post draft || 3 || false
+::ITEM::
+organize desktop icons || 2 || true
+::ITEM::
+review checklist app code || 5 || false
+::ITEM::
+clean keyboard || 1 || false
+::ITEM::
+play mobile game || 1 || true
+::ITEM::
+plan grocery shopping route || 3 || false
+::ITEM::
+sort photo library || 2 || true
+::ITEM::
+prepare dinner || 4 || true
+::ITEM::
+read tech newsletter || 3 || false

@@ -37,7 +37,7 @@ Task ordering is preserved with drag-and-drop, and changes automatically propaga
 
 ## Why This Exists
 
-I built this project to explore clean, static frontend design patterns for task management. The focus is on minimal dependencies, intuitive interactions, and fully client-side operation.
+I wanted a simple checklist with prioritization that I could more easily change the functionality of, and had extremely low friction in use.
 
 ## License
 

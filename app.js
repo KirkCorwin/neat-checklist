@@ -35,7 +35,7 @@ const PRIORITIES = [
 // ===========================
 const titleEl = document.querySelector("header h1");
 
-titleEl.ondblclick = () => {
+titleEl.onclick = () => {
   const inputEl = document.createElement("input");
   inputEl.type = "text";
   inputEl.value = listTitle;
@@ -238,7 +238,10 @@ function render() {
     const text = document.createElement("div");
     text.className = "text";
     text.textContent = item.text;
-    text.ondblclick = () => startRename(text, item);
+    text.onclick = e => {
+      e.stopPropagation();
+      startRename(text, item);
+    };
 
     const right = document.createElement("div");
     right.className = "right-controls";
@@ -292,20 +295,39 @@ function render() {
 // ===========================
 // Rename item
 // ===========================
+
 function startRename(textEl, item) {
   const inputEl = document.createElement("input");
   inputEl.className = "rename";
   inputEl.value = item.text;
-  inputEl.onblur = finish;
-  inputEl.onkeydown = e => e.key === "Enter" && finish();
+
+  let finished = false;
+
   function finish() {
-    if (inputEl.value.trim()) item.text = inputEl.value.trim();
+    if (finished) return;
+    finished = true;
+
+    const value = inputEl.value.trim();
+    if (value) item.text = value;
+
     render();
   }
+
+  inputEl.addEventListener("blur", finish);
+  inputEl.addEventListener("keydown", e => {
+    if (e.key === "Enter") finish();
+    if (e.key === "Escape") render();
+  });
+
+  inputEl.addEventListener("click", e => e.stopPropagation());
+  inputEl.addEventListener("mousedown", e => e.stopPropagation());
+
   textEl.replaceWith(inputEl);
   inputEl.focus();
   inputEl.select();
 }
+
+
 
 // ===========================
 // Close individual priority menus on background click

@@ -5,6 +5,7 @@
 const list = document.getElementById("list");
 const input = document.getElementById("itemInput");
 const addBtn = document.getElementById("addItemBtn");
+const toggleOptionsBtn = document.getElementById("toggleOptions");
 const togglePriorityBtn = document.getElementById("togglePriority");
 const sortPriorityBtn = document.getElementById("sortPriority");
 const deleteDoneBtn = document.getElementById("deleteDone");
@@ -17,6 +18,7 @@ const menuToggleMobile = document.getElementById("menuToggleMobile");
 
 let items = [];
 let showPriority = false;
+let optionsOpen = false;
 let draggedId = null;
 let dropTargetId = null;
 let dropPosition = null; // 'before' | 'after'
@@ -165,6 +167,20 @@ addBtn.onclick = () => addItem();
 // ===========================
 // Controls
 // ===========================
+// Options toggle button
+toggleOptionsBtn.onclick = () => {
+  optionsOpen = !optionsOpen;
+  toggleOptionsBtn.textContent = optionsOpen ? "Close Options" : "Options";
+  
+  // Show/hide all option buttons
+  document.querySelectorAll(".option-button").forEach(btn => {
+    btn.style.display = optionsOpen ? "" : "none";
+  });
+};
+
+// Initialize options as closed
+toggleOptionsBtn.onclick();
+
 togglePriorityBtn.onclick = () => {
   showPriority = !showPriority;
   document.body.classList.toggle("show-global-priority", showPriority);
@@ -358,29 +374,13 @@ function render() {
     text.className = "text";
     text.textContent = item.text;
     
-    // Handle click/tap to start editing
-    let clickTimeout = null;
+    // Simple click handler - just start editing immediately
     text.onclick = e => {
       e.stopPropagation();
-      // Don't prevent default - we need normal click behavior for mobile keyboard
       // Only start editing if not already editing
       if (text.contentEditable !== 'true') {
-        // Small delay on mobile to ensure click event completes before focus
-        if (window.innerWidth <= 767) {
-          clearTimeout(clickTimeout);
-          clickTimeout = setTimeout(() => {
-            startRename(text, item);
-          }, 100);
-        } else {
-          startRename(text, item);
-        }
+        startRename(text, item);
       }
-    };
-    
-    // Prevent touch events from interfering with click
-    text.ontouchstart = (e) => {
-      e.stopPropagation();
-      // Don't prevent default - we need normal touch behavior for mobile keyboard
     };
 
     // Mobile layout: checkbox, bubbles, toggle on one line; text below
@@ -447,7 +447,7 @@ function render() {
         syncControls();
       };
       toggle.onmousedown = (e) => { e.stopPropagation(); e.preventDefault(); };
-      toggle.ontouchstart = (e) => { e.stopPropagation(); e.preventDefault(); };
+      toggle.ontouchstart = (e) => { e.stopPropagation(); };
       
       syncControls();
       rightControls.append(bubbles, toggle, del);
@@ -513,7 +513,7 @@ function render() {
         syncControls();
       };
       toggle.onmousedown = (e) => { e.stopPropagation(); e.preventDefault(); };
-      toggle.ontouchstart = (e) => { e.stopPropagation(); e.preventDefault(); };
+      toggle.ontouchstart = (e) => { e.stopPropagation(); };
 
       syncControls();
       right.append(toggle, bubbles, del);
@@ -556,17 +556,20 @@ function startRename(textEl, item) {
     li.draggable = false;
   }
   
-  // Move cursor to end (only on first edit, not on subsequent clicks)
-  // Use requestAnimationFrame to ensure DOM is ready
-  requestAnimationFrame(() => {
+  // Focus immediately - don't use preventScroll on mobile as it prevents keyboard
+  textEl.focus();
+  
+  // Move cursor to end after focus
+  setTimeout(() => {
     const range = document.createRange();
     const selection = window.getSelection();
-    range.selectNodeContents(textEl);
-    range.collapse(false); // Collapse to end
-    selection.removeAllRanges();
-    selection.addRange(range);
-    textEl.focus();
-  });
+    if (textEl.firstChild) {
+      range.selectNodeContents(textEl);
+      range.collapse(false); // Collapse to end
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+  }, 0);
 
   let finished = false;
 
@@ -593,65 +596,19 @@ function startRename(textEl, item) {
     render();
   }
 
-  // Use a delayed blur handler on mobile to prevent keyboard from closing immediately
-  let blurTimeout = null;
-  const blurHandler = () => {
-    // On mobile, add a small delay to prevent keyboard from closing too quickly
-    if (window.innerWidth <= 767) {
-      clearTimeout(blurTimeout);
-      blurTimeout = setTimeout(() => {
-        finish();
-      }, 150);
-    } else {
-      finish();
-    }
-  };
-  
-  textEl.addEventListener("blur", blurHandler);
+  textEl.addEventListener("blur", finish);
   textEl.addEventListener("keydown", e => {
     if (e.key === "Enter") {
       e.preventDefault();
-      if (blurTimeout) clearTimeout(blurTimeout);
       finish();
     }
     if (e.key === "Escape") {
-      if (blurTimeout) clearTimeout(blurTimeout);
       textEl.textContent = item.text;
       finish();
     }
   });
 
-  textEl.addEventListener("click", e => {
-    e.stopPropagation();
-    // Clear any pending blur timeout when clicking to keep editing
-    if (blurTimeout) {
-      clearTimeout(blurTimeout);
-    }
-    // On mobile, ensure focus is maintained
-    if (window.innerWidth <= 767 && document.activeElement !== textEl) {
-      setTimeout(() => {
-        textEl.focus({ preventScroll: true });
-      }, 50);
-    }
-  });
-  
-  // Prevent mousedown from interfering with focus on mobile
-  textEl.addEventListener("mousedown", e => {
-    e.stopPropagation();
-    // Clear blur timeout to prevent accidental finish
-    if (blurTimeout) {
-      clearTimeout(blurTimeout);
-    }
-  });
-  
-  // On mobile, handle touch events to ensure focus works
-  textEl.addEventListener("touchstart", e => {
-    e.stopPropagation();
-    // Clear blur timeout
-    if (blurTimeout) {
-      clearTimeout(blurTimeout);
-    }
-  });
+  textEl.addEventListener("click", e => e.stopPropagation());
   
   // Don't interfere with mousedown - let browser handle text selection naturally
   // The parent li's draggable=false and dragstart handler will prevent item drag
@@ -1295,8 +1252,7 @@ function getTemplatesData() {
 
 function ensureDefaultTemplates() {
   const data = getTemplatesData();
-  if (data.templateOrder.length) return;
-
+  
   const defaults = [
     {
       name: "Everyday tasks",
@@ -1357,6 +1313,10 @@ function ensureDefaultTemplates() {
   ];
 
   defaults.forEach(template => {
+    // Check if template with this name already exists
+    const existing = Object.values(data.templates || {}).find(t => t.name === template.name);
+    if (existing) return;
+    
     const id = crypto.randomUUID();
     data.templates[id] = {
       id: id,

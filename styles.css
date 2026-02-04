@@ -51,6 +51,10 @@ header h1 {
   flex-wrap: wrap;
 }
 
+.option-button {
+  /* Option buttons are hidden by default, shown when options are open */
+}
+
 /* Buttons */
 button {
   padding: 0.65rem 1.2rem;
@@ -870,7 +874,7 @@ body.dark .checklist-item-name:hover {
   
   .item-row-2 {
     width: 100%;
-    margin-top: 0.5rem;
+    margin-top: 10px;
     flex: 1 1 100%;
     order: 2;
   }

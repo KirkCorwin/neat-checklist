@@ -357,18 +357,30 @@ function render() {
     const text = document.createElement("div");
     text.className = "text";
     text.textContent = item.text;
+    
+    // Handle click/tap to start editing
+    let clickTimeout = null;
     text.onclick = e => {
       e.stopPropagation();
-      e.preventDefault();
+      // Don't prevent default - we need normal click behavior for mobile keyboard
       // Only start editing if not already editing
       if (text.contentEditable !== 'true') {
-        startRename(text, item);
+        // Small delay on mobile to ensure click event completes before focus
+        if (window.innerWidth <= 767) {
+          clearTimeout(clickTimeout);
+          clickTimeout = setTimeout(() => {
+            startRename(text, item);
+          }, 100);
+        } else {
+          startRename(text, item);
+        }
       }
     };
-    // Prevent touch events from causing scroll
+    
+    // Prevent touch events from interfering with click
     text.ontouchstart = (e) => {
       e.stopPropagation();
-      // Don't prevent default here - we want normal touch behavior for text selection
+      // Don't prevent default - we need normal touch behavior for mobile keyboard
     };
 
     // Mobile layout: checkbox, bubbles, toggle on one line; text below
@@ -581,19 +593,65 @@ function startRename(textEl, item) {
     render();
   }
 
-  textEl.addEventListener("blur", finish);
+  // Use a delayed blur handler on mobile to prevent keyboard from closing immediately
+  let blurTimeout = null;
+  const blurHandler = () => {
+    // On mobile, add a small delay to prevent keyboard from closing too quickly
+    if (window.innerWidth <= 767) {
+      clearTimeout(blurTimeout);
+      blurTimeout = setTimeout(() => {
+        finish();
+      }, 150);
+    } else {
+      finish();
+    }
+  };
+  
+  textEl.addEventListener("blur", blurHandler);
   textEl.addEventListener("keydown", e => {
     if (e.key === "Enter") {
       e.preventDefault();
+      if (blurTimeout) clearTimeout(blurTimeout);
       finish();
     }
     if (e.key === "Escape") {
+      if (blurTimeout) clearTimeout(blurTimeout);
       textEl.textContent = item.text;
       finish();
     }
   });
 
-  textEl.addEventListener("click", e => e.stopPropagation());
+  textEl.addEventListener("click", e => {
+    e.stopPropagation();
+    // Clear any pending blur timeout when clicking to keep editing
+    if (blurTimeout) {
+      clearTimeout(blurTimeout);
+    }
+    // On mobile, ensure focus is maintained
+    if (window.innerWidth <= 767 && document.activeElement !== textEl) {
+      setTimeout(() => {
+        textEl.focus({ preventScroll: true });
+      }, 50);
+    }
+  });
+  
+  // Prevent mousedown from interfering with focus on mobile
+  textEl.addEventListener("mousedown", e => {
+    e.stopPropagation();
+    // Clear blur timeout to prevent accidental finish
+    if (blurTimeout) {
+      clearTimeout(blurTimeout);
+    }
+  });
+  
+  // On mobile, handle touch events to ensure focus works
+  textEl.addEventListener("touchstart", e => {
+    e.stopPropagation();
+    // Clear blur timeout
+    if (blurTimeout) {
+      clearTimeout(blurTimeout);
+    }
+  });
   
   // Don't interfere with mousedown - let browser handle text selection naturally
   // The parent li's draggable=false and dragstart handler will prevent item drag
@@ -1269,6 +1327,31 @@ function ensureDefaultTemplates() {
         { id: crypto.randomUUID(), text: "Arrange pet care", priority: 4, done: false },
         { id: crypto.randomUUID(), text: "Lock doors/windows", priority: 5, done: false },
         { id: crypto.randomUUID(), text: "Set out-of-office email", priority: 3, done: false }
+      ]
+    },
+    {
+      name: "Example Checklist",
+      items: [
+        { id: crypto.randomUUID(), text: "Review PR #42 - User authentication flow", priority: 5, done: true },
+        { id: crypto.randomUUID(), text: "Daily standup meeting (10am)", priority: 4, done: false },
+        { id: crypto.randomUUID(), text: "Fix bug in mobile layout scrolling", priority: 5, done: false },
+        { id: crypto.randomUUID(), text: "Write unit tests for encryption module", priority: 3, done: false },
+        { id: crypto.randomUUID(), text: "Update documentation for API v2", priority: 2, done: false },
+        { id: crypto.randomUUID(), text: "Code review: Sarah's database migration PR", priority: 4, done: true },
+        { id: crypto.randomUUID(), text: "Sprint planning meeting (2pm)", priority: 4, done: false },
+        { id: crypto.randomUUID(), text: "Deploy staging environment for testing", priority: 5, done: false },
+        { id: crypto.randomUUID(), text: "Research new caching library options", priority: 1, done: false },
+        { id: crypto.randomUUID(), text: "Update dependencies (security patches)", priority: 3, done: true },
+        { id: crypto.randomUUID(), text: "Refactor user settings component", priority: 2, done: false },
+        { id: crypto.randomUUID(), text: "Team retrospective (Friday 3pm)", priority: 3, done: false },
+        { id: crypto.randomUUID(), text: "Fix critical production bug - payment processing", priority: 5, done: false },
+        { id: crypto.randomUUID(), text: "Update README with new setup instructions", priority: 2, done: true },
+        { id: crypto.randomUUID(), text: "Pair programming session with Alex", priority: 3, done: false },
+        { id: crypto.randomUUID(), text: "Optimize database queries for dashboard", priority: 4, done: false },
+        { id: crypto.randomUUID(), text: "Review and merge feature branch", priority: 4, done: true },
+        { id: crypto.randomUUID(), text: "Set up CI/CD pipeline for new microservice", priority: 3, done: false },
+        { id: crypto.randomUUID(), text: "Learn new framework features (async/await patterns)", priority: 1, done: false },
+        { id: crypto.randomUUID(), text: "Client demo preparation", priority: 5, done: false }
       ]
     }
   ];

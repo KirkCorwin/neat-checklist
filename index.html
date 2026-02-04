@@ -7,9 +7,96 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="app">
+  <!-- Mobile Header Bar -->
+  <div class="mobile-header-bar">
+    <button id="menuToggleMobile" class="menu-toggle">☰</button>
+  </div>
 
+  <!-- Menu Overlay -->
+  <div id="menuOverlay" class="menu-overlay"></div>
+
+  <!-- Side Menu -->
+  <div id="sideMenu" class="side-menu">
+    <div class="menu-header">
+      <div class="menu-header-spacer"></div>
+      <h2>Checklists</h2>
+    </div>
+    
+    <div class="menu-content">
+      <!-- Auth Section -->
+      <div class="menu-section">
+        <div id="authSection">
+          <button id="signInBtn" class="menu-button primary">Sign in with Google</button>
+          <div id="userInfo" class="user-info" style="display: none;">
+            <div class="user-email"></div>
+            <button id="signOutBtn" class="menu-button">Sign Out</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Appearance -->
+      <div class="menu-section">
+        <label class="menu-label">Appearance</label>
+        <button id="toggleDarkSidebar" class="menu-button">Dark Mode</button>
+        <button id="colorToggle" class="menu-button">Priority Colors</button>
+        <!-- Color Customizer (pushes content down when open) -->
+        <div id="colorCustomizer" class="color-customizer" aria-hidden="true">
+          <div class="color-customizer-row">
+            <button class="color-bubble" data-level="1" title="Later color">Later</button>
+            <button class="color-bubble" data-level="2" title="Low color">Low</button>
+            <button class="color-bubble" data-level="3" title="High color">High</button>
+            <button class="color-bubble" data-level="4" title="Very High color">VHigh</button>
+            <button class="color-bubble" data-level="5" title="NOW color">NOW</button>
+          </div>
+          <input
+            type="color"
+            id="priorityColorPicker"
+            class="priority-color-picker"
+            aria-label="Select priority color"
+          />
+        </div>
+      </div>
+
+      <!-- Organize -->
+      <div class="menu-section">
+        <label class="menu-label">Organize</label>
+        <button id="abcSortBtn" class="menu-button">ABC Sort</button>
+      </div>
+
+      <!-- Templates -->
+      <div class="menu-section">
+        <label class="menu-label">Templates</label>
+        <button id="toggleTemplateMenu" class="menu-button">New checklist from template</button>
+        <div id="templateMenu" class="template-menu" aria-hidden="true">
+          <div class="template-menu-actions">
+            <button id="newTemplateBtn" class="menu-button">+ New Template</button>
+          </div>
+          <div id="templatesList" class="templates-list"></div>
+        </div>
+      </div>
+
+      <!-- New Checklist -->
+      <div class="menu-section">
+        <button id="newChecklistBtn" class="menu-button">+ New Checklist</button>
+      </div>
+
+      <!-- Current Checklist Section -->
+      <div class="menu-section">
+        <label class="menu-label">Current Checklist</label>
+        <div id="currentChecklistName" class="current-checklist-name"></div>
+      </div>
+
+      <!-- Saved Checklists List -->
+      <div class="menu-section">
+        <label class="menu-label">Saved Checklists</label>
+        <div id="checklistsList" class="checklists-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="app">
     <header>
+      <button id="menuToggle" class="menu-toggle">☰</button>
       <h1>Checklist Queue</h1>
       <div class="controls">
         <button id="togglePriority">Edit Priority</button>
@@ -19,7 +106,7 @@
         <button id="undo">Undo</button>
         <button id="copyList">Copy List</button>
         <button id="saveFile">Save List</button>
-        <button id="toggleDark">Dark Mode</button>
+        <button id="saveTemplateBtn" style="display:none">Save Template</button>
         <button id="toggleInputPos">Bottom</button>
       </div>
     </header>
@@ -40,6 +127,9 @@
 
   </div>
 
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

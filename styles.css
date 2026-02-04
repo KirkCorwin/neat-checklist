@@ -33,10 +33,15 @@ body.dark {
 }
 
 /* Header / title */
+header {
+  position: relative;
+}
+
 header h1 {
   font-size: 2rem;
   font-weight: 800;
   cursor: pointer;
+  margin-left: 3rem; /* Make room for hamburger menu */
 }
 
 /* Controls */
@@ -95,6 +100,27 @@ ul {
   position: relative;
 }
 
+.item.drop-before::before,
+.item.drop-after::after {
+  content: "";
+  position: absolute;
+  left: 1rem;
+  right: 1rem;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.85);
+  border-radius: 999px;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.35);
+}
+
+body.dark .item.drop-before::before,
+body.dark .item.drop-after::after {
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.35);
+}
+
+.item.drop-before::before { top: -6px; }
+.item.drop-after::after { bottom: -6px; }
+
 .item.dragging {
   opacity: 0.4;
 }
@@ -125,18 +151,29 @@ input[type="checkbox"] {
   flex: 1;
   font-weight: 500;
   cursor: text;
+  padding: 0.25rem;
+  border-radius: 4px;
+  min-height: 1.5rem;
+  transition: background 0.15s ease;
 }
 
-/* Rename input */
-.rename {
-  flex: 1;
-  font-size: 1.25rem;
-  border: none;
-  background: transparent;
-  outline: none;
-  font-weight: 500;
-  padding: 0;
-  margin: 0;
+.text:hover {
+  background: rgba(0,0,0,0.05);
+}
+
+body.dark .text:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+/* Text editing state (contentEditable) */
+.text.editing {
+  background: rgba(0,0,0,0.1);
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+body.dark .text.editing {
+  background: rgba(255,255,255,0.1);
 }
 
 /* Right-side controls container */
@@ -250,54 +287,690 @@ footer {
   font-size: 1.1rem;
 }
 
+/* ===========================
+   Menu Styles
+   =========================== */
 
-/* Responsive layout for small screens */
-@media (max-width: 500px) {
-  .item {
-    flex-direction: column; /* stack checkbox/text above controls */
-    align-items: flex-start;
+/* Mobile Header Bar */
+.mobile-header-bar {
+  display: none; /* Hidden on desktop, shown on mobile */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  background: white;
+  z-index: 1001;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 0.5rem 1rem;
+  align-items: center;
+}
+
+body.dark .mobile-header-bar {
+  background: #222;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+/* Menu Toggle Button */
+.menu-toggle {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 1001;
+  width: 48px;
+  height: 48px;
+  font-size: 1.5rem;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  border: 2px solid currentColor;
+  transition: position 0.3s ease;
+}
+
+body.dark .menu-toggle {
+  background: #222;
+  color: #eee;
+  border-color: #eee;
+}
+
+.menu-toggle:hover {
+  background: #111;
+  color: white;
+}
+
+body.dark .menu-toggle:hover {
+  background: #333;
+}
+
+/* Menu Overlay */
+.menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.menu-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Side Menu */
+.side-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 320px;
+  max-width: 85vw;
+  height: 100vh;
+  background: var(--bg-light);
+  z-index: 1000;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+body.dark .side-menu {
+  background: var(--bg-dark);
+}
+
+.side-menu.open {
+  transform: translateX(0);
+}
+
+/* Menu Header */
+.menu-header {
+  display: grid;
+  grid-template-columns: 48px 1fr 48px;
+  align-items: center;
+  padding: 1.25rem 1.25rem;
+  border-bottom: 2px solid rgba(0,0,0,0.1);
+}
+
+body.dark .menu-header {
+  border-bottom-color: rgba(255,255,255,0.1);
+}
+
+.menu-header-spacer {
+  width: 48px;
+  height: 48px;
+}
+
+.menu-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+/* Rainbow color toggle (only visible when sidebar is open) */
+/* Color customizer */
+.color-customizer {
+  display: none;
+  padding: 0.75rem 1rem 0;
+}
+
+.menu-section.color-open .color-customizer {
+  display: block;
+}
+
+.color-customizer-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid rgba(0,0,0,0.08);
+}
+
+body.dark .color-customizer-row {
+  border-bottom-color: rgba(255,255,255,0.08);
+}
+
+.color-bubble {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 0.7rem;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.05;
+  padding: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+
+.color-bubble[data-level="1"] { background: rgb(var(--later)); }
+.color-bubble[data-level="2"] { background: rgb(var(--low)); }
+.color-bubble[data-level="3"] { background: rgb(var(--high)); }
+.color-bubble[data-level="4"] { background: rgb(var(--very-high)); }
+.color-bubble[data-level="5"] { background: rgb(var(--now)); }
+
+.priority-color-picker {
+  margin-top: 0.75rem;
+  width: 100%;
+  height: 36px;
+  border-radius: 999px;
+  border: none;              /* no black outline */
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* Menu Content */
+.menu-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.menu-section {
+  margin-bottom: 1.5rem;
+}
+
+.menu-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.menu-button {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 2px solid currentColor;
+  background: white;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-bottom: 0.5rem;
+}
+
+body.dark .menu-button {
+  background: #222;
+}
+
+.menu-button:hover {
+  background: #111;
+  color: white;
+}
+
+.menu-button.primary {
+  background: #4285f4;
+  color: white;
+  border-color: #4285f4;
+}
+
+.menu-button.primary:hover {
+  background: #357ae8;
+}
+
+/* User Info */
+.user-info {
+  padding: 0.75rem;
+  background: rgba(0,0,0,0.05);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+body.dark .user-info {
+  background: rgba(255,255,255,0.05);
+}
+
+.user-email {
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  word-break: break-all;
+}
+
+/* Current Checklist Name */
+.current-checklist-name {
+  padding: 0.75rem;
+  background: rgba(0,0,0,0.05);
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: text;
+  min-height: 2.5rem;
+}
+
+body.dark .current-checklist-name {
+  background: rgba(255,255,255,0.05);
+}
+
+/* Checklists List */
+.checklists-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.template-menu {
+  display: none;
+  margin-top: 0.5rem;
+}
+
+.side-menu.template-open .template-menu {
+  display: block;
+}
+
+.template-menu-actions {
+  margin-bottom: 0.5rem;
+}
+
+.templates-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.template-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: rgba(0,0,0,0.05);
+  border-radius: 8px;
+  transition: background 0.15s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+body.dark .template-item {
+  background: rgba(255,255,255,0.05);
+}
+
+.template-item:hover {
+  background: rgba(0,0,0,0.1);
+}
+
+body.dark .template-item:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.template-item-name {
+  flex: 1;
+  font-weight: 500;
+  cursor: text;
+  padding: 0.25rem;
+  border-radius: 4px;
+  min-height: 1.5rem;
+}
+
+.template-item-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.template-action-btn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: 0.9rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 2px solid currentColor;
+  background: transparent;
+}
+
+.template-action-btn.new {
+  background: rgba(33, 150, 243, 0.2);
+  color: #2196f3;
+}
+
+.template-action-btn.edit {
+  background: rgba(255, 152, 0, 0.2);
+  color: #ff9800;
+}
+
+.template-action-btn.delete {
+  background: rgba(244, 67, 54, 0.2);
+  color: #f44336;
+}
+
+.template-action-btn.delete.confirming {
+  background: rgba(244, 67, 54, 0.5);
+  font-weight: 800;
+}
+
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: rgba(0,0,0,0.05);
+  border-radius: 8px;
+  transition: background 0.15s ease;
+  position: relative;
+}
+
+.checklist-item.drop-before::before,
+.checklist-item.drop-after::after,
+.template-item.drop-before::before,
+.template-item.drop-after::after {
+  content: "";
+  position: absolute;
+  left: 0.75rem;
+  right: 0.75rem;
+  height: 3px;
+  background: rgba(0, 0, 0, 0.75);
+  border-radius: 999px;
+}
+
+body.dark .checklist-item.drop-before::before,
+body.dark .checklist-item.drop-after::after,
+body.dark .template-item.drop-before::before,
+body.dark .template-item.drop-after::after {
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.checklist-item.drop-before::before,
+.template-item.drop-before::before { top: -6px; }
+.checklist-item.drop-after::after,
+.template-item.drop-after::after { bottom: -6px; }
+
+body.dark .checklist-item {
+  background: rgba(255,255,255,0.05);
+}
+
+.checklist-item:hover {
+  background: rgba(0,0,0,0.1);
+}
+
+body.dark .checklist-item:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.checklist-item-name {
+  flex: 1;
+  font-weight: 500;
+  cursor: text;
+  padding: 0.25rem;
+  border-radius: 4px;
+  min-height: 1.5rem;
+}
+
+.checklist-item-name:hover {
+  background: rgba(0,0,0,0.05);
+}
+
+body.dark .checklist-item-name:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.checklist-item-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.checklist-action-btn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: 0.9rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.checklist-action-btn.load {
+  background: rgba(33, 150, 243, 0.2);
+  color: #2196f3;
+}
+
+.checklist-action-btn.load:hover {
+  background: rgba(33, 150, 243, 0.3);
+}
+
+.checklist-action-btn.download {
+  background: rgba(76, 175, 80, 0.2);
+  color: #4caf50;
+}
+
+.checklist-action-btn.download:hover {
+  background: rgba(76, 175, 80, 0.3);
+}
+
+.checklist-action-btn.delete {
+  background: rgba(244, 67, 54, 0.2);
+  color: #f44336;
+}
+
+.checklist-action-btn.delete:hover {
+  background: rgba(244, 67, 54, 0.3);
+}
+
+.checklist-action-btn.delete.confirming {
+  background: rgba(244, 67, 54, 0.5);
+  font-weight: 800;
+}
+
+/* Empty State */
+.checklists-list:empty::after {
+  content: "No saved checklists";
+  display: block;
+  text-align: center;
+  padding: 2rem;
+  opacity: 0.5;
+  font-style: italic;
+}
+
+/* Responsive: Mobile Menu (Hamburger from top) */
+@media (max-width: 767px) {
+  /* Show mobile header bar */
+  .mobile-header-bar {
+    display: flex;
+  }
+  
+  /* Hide desktop hamburger, show mobile one in bar */
+  #menuToggle {
+    display: none;
+  }
+  
+  #menuToggleMobile {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: 40px;
+    height: 40px;
+    box-shadow: none;
+  }
+  
+  /* Add padding for mobile header bar */
+  body {
+    padding-top: 56px;
+  }
+  
+  .app {
+    padding-top: 0;
+  }
+
+  .side-menu {
+    width: 100vw;
+    max-width: 100vw;
+    top: 0;
+    left: 0;
+    transform: translateY(-100%);
+    height: auto;
+    max-height: 80vh;
+    border-radius: 0 0 16px 16px;
+  }
+
+  .side-menu.open {
+    transform: translateY(0);
+  }
+
+  .menu-header {
+    padding: 1.25rem 1.25rem;
+  }
+
+  header h1 {
+    margin-left: 0; /* No need for margin since hamburger is in bar */
+  }
+  
+  /* Mobile item layout - two rows */
+  .item-row-1 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: nowrap;
+    width: 100%;
     gap: 0.5rem;
   }
-
-  .right-controls {
+  
+  .item-left-controls {
     display: flex;
-    flex-wrap: wrap;       /* allow buttons to go to second row */
-    margin-top: 0.5rem;
-    width: 100%;
-    justify-content: flex-start;
-    gap: 0.25rem;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+    min-width: 0;
   }
-
-  /* Keep toggle button in normal size and first */
-  .priority-toggle {
-    width: 42px;
-    height: 42px;
+  
+  .item-right-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     flex-shrink: 0;
-    order: 1;
+    justify-content: flex-end;
   }
-
-  /* Checkbox */
-  input[type="checkbox"] {
+  
+  .item-row-2 {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+  
+  /* Priority bubbles in mobile - inline with checkbox */
+  .item-row-1 .priority-bubbles {
+    display: flex;
+    gap: 0.25rem;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-end;
+  }
+  
+  .item-row-1 .priority-bubbles .priority {
+    width: 36px;
+    height: 36px;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+  }
+  
+  .item-row-1 .priority-toggle {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+  }
+  
+  .item-row-1 .delete-item {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+  
+  .item-row-1 input[type="checkbox"] {
     width: 32px;
     height: 32px;
-    accent-color: #111;
-    cursor: pointer;
+    flex-shrink: 0;
+  }
+}
+
+/* Desktop: Side Panel */
+@media (min-width: 768px) {
+  /* Hide mobile header bar on desktop */
+  .mobile-header-bar {
+    display: none;
+  }
+  
+  /* Show desktop hamburger */
+  #menuToggle {
+    display: flex;
+  }
+  
+  /* Remove mobile padding */
+  body {
+    padding-top: 0;
   }
 
-  /* Scale down other buttons */
-  .priority-bubbles .priority,
-  .delete-item {
-    width: 42px;
-    height: 42px;
-    font-size: 0.9rem;
-    order: 2; 
+  .app {
+    margin-left: 0;
+    transition: margin-left 0.3s ease;
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
-  /* Ensure bubbles + delete wrap correctly */
-  .priority-bubbles,
-  .delete-item {
-    display: flex;           /* flex for inner content alignment */
-    justify-content: center;
-    align-items: center;
+  /* Only shift checklist when menu opens if there isn't enough room */
+  /* Menu (320px) + Checklist (720px) + padding = ~1100px needed */
+  body.menu-open .app {
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  /* When window is too narrow, shift checklist to make room for menu */
+  @media (max-width: 1100px) {
+    body.menu-open .app {
+      margin-left: 320px;
+      margin-right: auto;
+    }
+  }
+
+  .menu-toggle {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+  }
+  
+  header h1 {
+    margin-left: 3rem;
+  }
+}
+
+/* Additional mobile optimizations for very small screens */
+@media (max-width: 500px) {
+  .item-row-1 .priority-bubbles .priority {
+    width: 32px;
+    height: 32px;
+    font-size: 0.65rem;
+  }
+  
+  .item-row-1 .priority-toggle,
+  .item-row-1 .delete-item {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .item-row-1 input[type="checkbox"] {
+    width: 28px;
+    height: 28px;
   }
 }

@@ -241,6 +241,9 @@ function renderFLIP() {
 // Render
 // ===========================
 function render() {
+  // Preserve scroll position to prevent jumping
+  const scrollTop = list.scrollTop;
+  
   list.innerHTML = "";
 
   // helper to clear drop indicator classes
@@ -326,7 +329,7 @@ function render() {
     const cb = document.createElement("input");
     cb.type = "checkbox";
     cb.checked = item.done;
-    cb.onchange = () => { item.done = cb.checked; render(); };
+    cb.onchange = () => { item.done = cb.checked; renderFLIP(); };
 
     const text = document.createElement("div");
     text.className = "text";
@@ -347,11 +350,11 @@ function render() {
       itemRow1.className = "item-row-1";
       
       const leftControls = document.createElement("div");
-      leftControls.className = "left-controls";
+      leftControls.className = "item-left-controls";
       leftControls.appendChild(cb);
       
       const rightControls = document.createElement("div");
-      rightControls.className = "right-controls";
+      rightControls.className = "item-right-controls";
       
       const bubbles = document.createElement("div");
       bubbles.className = "priority-bubbles";
@@ -362,13 +365,12 @@ function render() {
         b.className = "priority" + (item.priority === p.level ? " selected" : "");
         b.dataset.level = p.level;
         b.textContent = p.label;
-        b.onclick = () => { item.priority = p.level; render(); };
+        b.onclick = () => { item.priority = p.level; renderFLIP(); };
         bubbles.appendChild(b);
       });
       
       const toggle = document.createElement("div");
       toggle.className = "priority-toggle";
-      toggle.textContent = "⚙";
       
       const del = document.createElement("div");
       del.className = "delete-item";
@@ -419,7 +421,7 @@ function render() {
         b.className = "priority" + (item.priority === p.level ? " selected" : "");
         b.dataset.level = p.level;
         b.textContent = p.label;
-        b.onclick = () => { item.priority = p.level; render(); };
+        b.onclick = () => { item.priority = p.level; renderFLIP(); };
         bubbles.appendChild(b);
       });
 
@@ -453,6 +455,9 @@ function render() {
     
     list.appendChild(li);
   });
+  
+  // Restore scroll position to prevent jumping
+  list.scrollTop = scrollTop;
 }
 
 // ===========================

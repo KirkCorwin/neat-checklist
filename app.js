@@ -232,17 +232,33 @@ function animateFLIP(old) {
 }
 
 function renderFLIP() {
+  // Preserve scroll position before rendering
+  const listScrollTop = list.scrollTop;
+  const windowScrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
+  
   const old = getPositions();
   render();
-  requestAnimationFrame(() => animateFLIP(old));
+  
+  // Restore scroll position immediately after render (render() also restores, but this ensures it)
+  requestAnimationFrame(() => {
+    if (listScrollTop !== undefined) {
+      list.scrollTop = listScrollTop;
+    }
+    if (windowScrollY !== undefined && windowScrollY > 0) {
+      window.scrollTo(0, windowScrollY);
+    }
+    // Then animate FLIP
+    animateFLIP(old);
+  });
 }
 
 // ===========================
 // Render
 // ===========================
 function render() {
-  // Preserve scroll position to prevent jumping
-  const scrollTop = list.scrollTop;
+  // Preserve scroll position to prevent jumping (check both list and window)
+  const listScrollTop = list.scrollTop;
+  const windowScrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
   
   list.innerHTML = "";
 
@@ -261,7 +277,7 @@ function render() {
     li.dataset.id = item.id;
     li.dataset.priority = item.priority;
     li.draggable = true;
-
+    
     li.ondragstart = (e) => {
       // Don't start drag if text is being edited (contentEditable = true)
       // This allows text selection to work naturally
@@ -329,17 +345,30 @@ function render() {
     const cb = document.createElement("input");
     cb.type = "checkbox";
     cb.checked = item.done;
-    cb.onchange = () => { item.done = cb.checked; renderFLIP(); };
+    cb.onchange = (e) => { 
+      e.stopPropagation();
+      item.done = cb.checked; 
+      renderFLIP(); 
+    };
+    // Prevent focus from causing scroll on mobile
+    cb.onmousedown = (e) => e.stopPropagation();
+    cb.ontouchstart = (e) => e.stopPropagation();
 
     const text = document.createElement("div");
     text.className = "text";
     text.textContent = item.text;
     text.onclick = e => {
       e.stopPropagation();
+      e.preventDefault();
       // Only start editing if not already editing
       if (text.contentEditable !== 'true') {
         startRename(text, item);
       }
+    };
+    // Prevent touch events from causing scroll
+    text.ontouchstart = (e) => {
+      e.stopPropagation();
+      // Don't prevent default here - we want normal touch behavior for text selection
     };
 
     // Mobile layout: checkbox, bubbles, toggle on one line; text below
@@ -365,7 +394,14 @@ function render() {
         b.className = "priority" + (item.priority === p.level ? " selected" : "");
         b.dataset.level = p.level;
         b.textContent = p.label;
-        b.onclick = () => { item.priority = p.level; renderFLIP(); };
+        b.onclick = (e) => { 
+          e.stopPropagation();
+          e.preventDefault();
+          item.priority = p.level; 
+          renderFLIP(); 
+        };
+        b.onmousedown = (e) => { e.stopPropagation(); e.preventDefault(); };
+        b.ontouchstart = (e) => { e.stopPropagation(); e.preventDefault(); };
         bubbles.appendChild(b);
       });
       
@@ -377,10 +413,13 @@ function render() {
       del.textContent = "🗑";
       del.onclick = e => {
         e.stopPropagation();
+        e.preventDefault();
         pushUndo();
         items = items.filter(i => i.id !== item.id);
         renderFLIP();
       };
+      del.onmousedown = (e) => { e.stopPropagation(); e.preventDefault(); };
+      del.ontouchstart = (e) => { e.stopPropagation(); e.preventDefault(); };
       
       function syncControls() {
         const editing = showPriority || bubbles.classList.contains("show");
@@ -391,9 +430,12 @@ function render() {
       
       toggle.onclick = e => {
         e.stopPropagation();
+        e.preventDefault();
         bubbles.classList.toggle("show");
         syncControls();
       };
+      toggle.onmousedown = (e) => { e.stopPropagation(); e.preventDefault(); };
+      toggle.ontouchstart = (e) => { e.stopPropagation(); e.preventDefault(); };
       
       syncControls();
       rightControls.append(bubbles, toggle, del);
@@ -421,7 +463,14 @@ function render() {
         b.className = "priority" + (item.priority === p.level ? " selected" : "");
         b.dataset.level = p.level;
         b.textContent = p.label;
-        b.onclick = () => { item.priority = p.level; renderFLIP(); };
+        b.onclick = (e) => { 
+          e.stopPropagation();
+          e.preventDefault();
+          item.priority = p.level; 
+          renderFLIP(); 
+        };
+        b.onmousedown = (e) => { e.stopPropagation(); e.preventDefault(); };
+        b.ontouchstart = (e) => { e.stopPropagation(); e.preventDefault(); };
         bubbles.appendChild(b);
       });
 
@@ -430,10 +479,13 @@ function render() {
       del.textContent = "🗑";
       del.onclick = e => {
         e.stopPropagation();
+        e.preventDefault();
         pushUndo();
         items = items.filter(i => i.id !== item.id);
         renderFLIP();
       };
+      del.onmousedown = (e) => { e.stopPropagation(); e.preventDefault(); };
+      del.ontouchstart = (e) => { e.stopPropagation(); e.preventDefault(); };
 
       function syncControls() {
         const editing = showPriority || bubbles.classList.contains("show");
@@ -444,9 +496,12 @@ function render() {
 
       toggle.onclick = e => {
         e.stopPropagation();
+        e.preventDefault();
         bubbles.classList.toggle("show");
         syncControls();
       };
+      toggle.onmousedown = (e) => { e.stopPropagation(); e.preventDefault(); };
+      toggle.ontouchstart = (e) => { e.stopPropagation(); e.preventDefault(); };
 
       syncControls();
       right.append(toggle, bubbles, del);
@@ -457,7 +512,16 @@ function render() {
   });
   
   // Restore scroll position to prevent jumping
-  list.scrollTop = scrollTop;
+  // Use requestAnimationFrame to ensure DOM is laid out before restoring scroll
+  requestAnimationFrame(() => {
+    if (listScrollTop !== undefined) {
+      list.scrollTop = listScrollTop;
+    }
+    // Also restore window scroll if it was scrolled
+    if (windowScrollY !== undefined && windowScrollY > 0) {
+      window.scrollTo(0, windowScrollY);
+    }
+  });
 }
 
 // ===========================

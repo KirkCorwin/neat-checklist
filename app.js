@@ -555,21 +555,6 @@ function startRename(textEl, item) {
   if (li) {
     li.draggable = false;
   }
-  
-  // Focus immediately - don't use preventScroll on mobile as it prevents keyboard
-  textEl.focus();
-  
-  // Move cursor to end after focus (don't select all text, just place cursor)
-  setTimeout(() => {
-    const range = document.createRange();
-    const selection = window.getSelection();
-    if (textEl.firstChild) {
-      range.setStart(textEl.firstChild, textEl.firstChild.textContent.length);
-      range.collapse(true); // Collapse to end
-      selection.removeAllRanges();
-      selection.addRange(range);
-    }
-  }, 50); // Slightly longer delay for mobile keyboard
 
   let finished = false;
 
@@ -596,8 +581,31 @@ function startRename(textEl, item) {
     render();
   }
 
-  textEl.addEventListener("blur", finish);
-  textEl.addEventListener("keydown", e => {
+  // Use onblur like sidebar for consistency
+  textEl.onblur = finish;
+  
+  // Focus after a small delay to ensure element is ready (especially on mobile)
+  // Use requestAnimationFrame to ensure DOM is laid out
+  requestAnimationFrame(() => {
+    // Double RAF to ensure layout is complete
+    requestAnimationFrame(() => {
+      textEl.focus();
+      
+      // Move cursor to end after focus (don't select all text, just place cursor)
+      setTimeout(() => {
+        const range = document.createRange();
+        const selection = window.getSelection();
+        if (textEl.firstChild) {
+          range.setStart(textEl.firstChild, textEl.firstChild.textContent.length);
+          range.collapse(true); // Collapse to end
+          selection.removeAllRanges();
+          selection.addRange(range);
+        }
+      }, 50); // Small delay for mobile keyboard
+    });
+  });
+  
+  textEl.onkeydown = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
       finish();
@@ -606,9 +614,9 @@ function startRename(textEl, item) {
       textEl.textContent = item.text;
       finish();
     }
-  });
+  };
 
-  textEl.addEventListener("click", e => e.stopPropagation());
+  textEl.onclick = (e) => e.stopPropagation();
   
   // Don't interfere with mousedown - let browser handle text selection naturally
   // The parent li's draggable=false and dragstart handler will prevent item drag

@@ -413,7 +413,7 @@ function render() {
           renderFLIP(); 
         };
         b.onmousedown = (e) => { e.stopPropagation(); e.preventDefault(); };
-        b.ontouchstart = (e) => { e.stopPropagation(); e.preventDefault(); };
+        b.ontouchstart = (e) => { e.stopPropagation(); };
         bubbles.appendChild(b);
       });
       
@@ -482,7 +482,7 @@ function render() {
           renderFLIP(); 
         };
         b.onmousedown = (e) => { e.stopPropagation(); e.preventDefault(); };
-        b.ontouchstart = (e) => { e.stopPropagation(); e.preventDefault(); };
+        b.ontouchstart = (e) => { e.stopPropagation(); };
         bubbles.appendChild(b);
       });
 
@@ -559,17 +559,17 @@ function startRename(textEl, item) {
   // Focus immediately - don't use preventScroll on mobile as it prevents keyboard
   textEl.focus();
   
-  // Move cursor to end after focus
+  // Move cursor to end after focus (don't select all text, just place cursor)
   setTimeout(() => {
     const range = document.createRange();
     const selection = window.getSelection();
     if (textEl.firstChild) {
-      range.selectNodeContents(textEl);
-      range.collapse(false); // Collapse to end
+      range.setStart(textEl.firstChild, textEl.firstChild.textContent.length);
+      range.collapse(true); // Collapse to end
       selection.removeAllRanges();
       selection.addRange(range);
     }
-  }, 0);
+  }, 50); // Slightly longer delay for mobile keyboard
 
   let finished = false;
 

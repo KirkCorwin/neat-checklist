@@ -19,6 +19,7 @@ const menuToggleMobile = document.getElementById("menuToggleMobile");
 let items = [];
 let showPriority = false;
 let optionsOpen = false;
+let editingItemId = null; // Track which item is currently being edited
 let draggedId = null;
 let dropTargetId = null;
 let dropPosition = null; // 'before' | 'after'
@@ -247,13 +248,96 @@ function animateFLIP(old) {
   });
 }
 
+// Safe render that preserves editing state
+function safeRender() {
+  // Save editing state if active
+  let editingState = null;
+  if (editingItemId !== null) {
+    const editingEl = list.querySelector(`.item[data-id="${editingItemId}"] .text`);
+    if (editingEl && editingEl.contentEditable === 'true') {
+      editingState = {
+        itemId: editingItemId,
+        text: editingEl.textContent,
+        isEditing: true
+      };
+    }
+  }
+  
+  // Call normal render
+  render();
+  
+  // Restore editing state if it existed
+  if (editingState) {
+    const item = items.find(i => i.id === editingState.itemId);
+    if (item) {
+      const newEl = list.querySelector(`.item[data-id="${editingState.itemId}"] .text`);
+      if (newEl) {
+        // Restore editing state
+        newEl.contentEditable = true;
+        newEl.classList.add('editing');
+        newEl.textContent = editingState.text;
+        const li = newEl.closest('.item');
+        if (li) li.draggable = false;
+        
+        // Re-attach event handlers
+        let finished = false;
+        function finish() {
+          if (finished) return;
+          finished = true;
+          const value = newEl.textContent.trim();
+          if (value) {
+            item.text = value;
+          } else {
+            newEl.textContent = item.text;
+          }
+          newEl.contentEditable = false;
+          newEl.classList.remove('editing');
+          if (li) li.draggable = true;
+          editingItemId = null;
+          render();
+        }
+        
+        newEl.onblur = finish;
+        newEl.onkeydown = (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            finish();
+          }
+          if (e.key === "Escape") {
+            newEl.textContent = item.text;
+            finish();
+          }
+        };
+        newEl.onclick = (e) => e.stopPropagation();
+        
+        // Focus after restoration
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            newEl.focus();
+            setTimeout(() => {
+              const range = document.createRange();
+              const selection = window.getSelection();
+              if (newEl.firstChild) {
+                range.setStart(newEl.firstChild, newEl.firstChild.textContent.length);
+                range.collapse(true);
+                selection.removeAllRanges();
+                selection.addRange(range);
+              }
+            }, 50);
+          });
+        });
+      }
+    }
+  }
+}
+
 function renderFLIP() {
   // Preserve scroll position before rendering
   const listScrollTop = list.scrollTop;
   const windowScrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
   
   const old = getPositions();
-  render();
+  safeRender();
   
   // Restore scroll position immediately after render (render() also restores, but this ensures it)
   requestAnimationFrame(() => {
@@ -294,11 +378,31 @@ function render() {
     li.dataset.priority = item.priority;
     li.draggable = true;
     
+    // Prevent drag when clicking on text element
+    li.onmousedown = (e) => {
+      // If clicking on text element, don't allow drag
+      if (e.target.closest('.text')) {
+        return; // Let text handle the event
+      }
+    };
+
+    li.ontouchstart = (e) => {
+      // If touching text element, don't allow drag
+      if (e.target.closest('.text')) {
+        return; // Let text handle the event
+      }
+    };
+
     li.ondragstart = (e) => {
       // Don't start drag if text is being edited (contentEditable = true)
       // This allows text selection to work naturally
       const textEl = li.querySelector('.text');
       if (textEl && textEl.contentEditable === 'true') {
+        e.preventDefault();
+        return;
+      }
+      // Also check if clicking on text element
+      if (e.target.closest('.text')) {
         e.preventDefault();
         return;
       }
@@ -546,6 +650,9 @@ function startRename(textEl, item) {
     return;
   }
   
+  // Track editing state
+  editingItemId = item.id;
+  
   // Use contentEditable like sidebar for consistent editing experience
   textEl.contentEditable = true;
   textEl.classList.add('editing');
@@ -577,6 +684,9 @@ function startRename(textEl, item) {
     if (li) {
       li.draggable = true;
     }
+    
+    // Clear editing state
+    editingItemId = null;
     
     render();
   }
@@ -626,6 +736,14 @@ function startRename(textEl, item) {
 // Close individual priority menus on background click
 // ===========================
 document.addEventListener("click", (e) => {
+  // Don't interfere if editing text
+  if (editingItemId !== null) {
+    const editingEl = list.querySelector(`.item[data-id="${editingItemId}"] .text`);
+    if (editingEl && editingEl.contains(e.target)) {
+      return; // Click is on editing element, don't interfere
+    }
+  }
+  
   // Only close if global priority toggle is NOT active
   if (showPriority) return;
 
@@ -637,9 +755,12 @@ document.addEventListener("click", (e) => {
     }
   });
 
-  setTimeout(() => {
-    render();
-  }, 0);
+  // Only render if not editing
+  if (editingItemId === null) {
+    setTimeout(() => {
+      render();
+    }, 0);
+  }
 });
 
 // ===========================
